@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <link href='https://fonts.googleapis.com/css?family=Cabin:400,700' rel='stylesheet' type='text/css'>
+  <title>Search</title>
+  <style>
+      /*TO DO:
+1. Update to responsive layout.
+*/
+ /*TO DO:
+ 1. Update to responsive layout.
+ */
+/* Basic Style */
+body {
+  background: #fff;
+  color: #333;
+  font-family: 'Cabin', sans-serif;
+}
+.container {
+  display: block;
+  width: 400px;
+  /* margin: 100px auto 0; */
+}
+ul {
+  margin: 0;
+  padding: 0;
+}
+li * {
+  float: left;
+}
+li, h3 {
+  clear: both;
+  list-style: none;
+}
+input, button {
+  outline: none;
+}
+button {
+  background: none;
+  border: 0px;
+  color: #858585;
+  font-size: 15px;
+  width: 60px;
+  margin: 10px 0 0;
+  font-family: 'Cabin', sans-serif;
+  cursor: pointer;
+}
+button:hover {
+  color: #333;
+}
+/* Heading */
+h3, label[for='new-task'] {
+  color: #333;
+  font-weight: 700;
+  font-size: 15px;
+  border-bottom: 2px solid #333;
+  padding: 30px 0 10px;
+  margin: 0;
+  text-transform: uppercase;
+}
+input[type="text"] {
+  margin: 0;
+  font-size: 18px;
+  line-height: 18px;
+  height: 18px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  background: #fff;
+  border-radius: 6px;
+  font-family: 'Cabin', sans-serif;
+  color: #858585;
+}
+input[type="text"]:focus {
+  color: #333;
+}
+/* New Task */
+label[for='new-task'] {
+  display: block;
+  margin: 0 0 20px;
+}
+input#new-task {
+  float: left;
+  width: 318px;
+}
+p > button:hover {
+  color: #0fc57c;
+}
+/* Task list */
+li {
+  overflow: hidden;
+  padding: 20px 0;
+  border-bottom: 1px solid #eee;
+}
+li > input[type="checkbox"] {
+  margin: 0 10px;
+  position: relative;
+  top: 15px;
+}
+li > label {
+  font-size: 18px;
+  line-height: 40px;
+  width: 237px;
+  padding: 0 0 0 11px;
+}
+li > input[type="text"] {
+  width: 226px;
+}
+li > .delete:hover {
+  color: #cf2323;
+}
+/* Completed */
+#completed-tasks label {
+  text-decoration: line-through;
+  color: #858585;
+}
+/* Edit Task */
+ul li input[type=text] {
+  display: none;
+}
+ul li.editMode input[type=text] {
+  display: block;
+}
+ul li.editMode label {
+  display: none;
+}
+
+ .matches {
+      position: absolute;
+      top: 0;
+      right: 100px;
+    }
+
+  </style>
+</head>
+
+<body>
+    <div class="container">
+        <!-- <p>
+            <label for="new-task">Create books</label>
+            <input id="new-task" type="text">
+            <button>Add</button>
+          </p> -->
+        
+        <p> 
+           <label for="new-task">Create books</label>
+                <input id="bookname" type="text"/>
+                <button onclick="return API.saveBook()"> Add</button>
+          </p>
+          <br/><br/>
+
+        <h3>Create videos</h3>
+        <p> 
+          <input id="videoname" type="text">
+          <button onclick="return API.saveVideo()"> Add </button>
+        </p>
+        <p>
+            <label for="new-task">Search</label>
+              <input id="search" type="text">
+              <button  onclick="return API.search()"> Search </button>
+        </p>
+        
+        <div class="matches">
+            <h3>Results</h3>
+         <ul id="matches">
+
+         </ul>
+      </div>
+    </div>
+  
+  <script>
+    const API = (() => {
+      const makeSaveFunc = (selector, postNameFunc) => () => {
+        try {
+          const val = document.querySelector(selector).value;
+          postNameFunc(val);
+        } catch (e) {
+          console.log(e);
+          console.log('--------------------------');
+        }
+        return false;
+      };
+
+      const makePostNameFunc = uri => val => {
+        fetch(uri, {
+          method: 'POST',
+          body: JSON.stringify({ name: val }),
+          headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json'
+          }
+        });
+      };
+
+      const postVideoName = makePostNameFunc("http://localhost:8080/api/v1/videos");
+      const postBookName = makePostNameFunc("http://localhost:8080/api/v1/books");
+
+      const search = () => {
+        try {
+          fetch("http://localhost:8080/api/v1/search")
+            .then(resp => resp.json())
+            .then(results => {
+              const ul = document.querySelector("#matches");
+              ul.innerHTML = '';
+              results.forEach(data => {
+                const li = document.createElement("li");
+                const liContent = `
+                  <label>${data.name}</label>
+                  <button class="edit">${data.type}</button>
+                `;
+                li.innerHTML = liContent;
+                ul.appendChild(li);
+              });
+            });
+        } catch (e) {
+          console.log(e);
+          console.log('--------------------------');
+        }
+        return false;
+      };
+
+      return {
+        saveVideo: makeSaveFunc("#videoname", postVideoName),
+        saveBook: makeSaveFunc("#bookname", postBookName),
+        search
+      }
+    })();
+  </script>
+</body>
+
+</html>
