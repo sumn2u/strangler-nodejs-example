@@ -4,15 +4,6 @@ services:
     build: './web'
     ports:
       - "3000:3000"
-      
-  # search:
-  #   build: './search'
-  #   ports:
-  #     - "3001:3000"
-  #   depends_on: 
-  #     - db
-  #   environment:
-  #     - MONGO_DB_URI=mongodb://db/myapp
 
   books:
     build: './books'
@@ -23,14 +14,6 @@ services:
     environment:
       - MONGO_DB_URI=mongodb://db/myapp
 
-  # videos:
-  #   build: './videos'
-  #   ports:
-  #     - "3003:3000"
-  #   depends_on: 
-  #     - db
-  #   environment:
-  #     - MONGO_DB_URI=mongodb://db/myapp
   
   db:
     image: mongo
@@ -47,5 +30,4 @@ services:
     depends_on:
       - web
       - books
-      # - search
-      # - videos
+      
